@@ -1,0 +1,19 @@
+global:
+  smtp_smarthost: 'smtp.yandex.com:587'
+  smtp_from: 'rafaelebalasanyan@yandex.ru'   
+  smtp_auth_username: 'rafaelebalasanyan@yandex.ru'     
+  smtp_auth_password: 'mvwpygorhdksukdb'
+  smtp_require_tls: true
+    
+route:
+  group_by: ['alertgroup']
+  group_wait: 30s
+  group_interval: 10m
+  repeat_interval: 60m
+  receiver: 'email'
+
+receivers:
+  - name: 'email'
+    email_configs:
+      - to: 'rafaelebalasanyan@yandex.ru'
+        send_resolved: true

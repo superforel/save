@@ -1,0 +1,70 @@
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: ${CONTAINER_NAME}-grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - prom_net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: ${CONTAINER_NAME}-prometheus
+    command: '--config.file=/etc/prometheus/prometheus.yaml'
+    restart: unless-stopped
+    volumes:
+      - prom_data:/prometheus
+      - ./config/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
+      - ./config/rules.yaml:/etc/prometheus/rules.yaml
+    networks: 
+      - prom_net
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:v1.8.2
+    container_name: ${CONTAINER_NAME}-node_exporter
+    command: '--path.rootfs=/host'
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
+    networks: 
+      - prom_net
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.51.0
+    container_name: ${CONTAINER_NAME}-cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    privileged: true
+    restart: unless-stopped
+    networks: 
+      - prom_net
+  
+  alertmanager:
+    image: quay.io/prometheus/alertmanager
+    container_name: ${CONTAINER_NAME}-alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/data
+    networks:
+      - prom_net
+
+volumes:
+  grafana-storage:
+  prom_data:
+  alertmanager-data:
+  keycloak-db-data:
+
+networks:
+  prom_net:
+    driver: bridge

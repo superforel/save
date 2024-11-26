@@ -1,0 +1,47 @@
+groups:
+  - name: node_exporter
+    rules:
+      - alert: PrometheusTargetMissing
+        expr: up == 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Сервис node_exporter на сервере {{ $labels.instance }} недоступен"
+          description: "Возможно сервис node_exporter упал или сервер недоступен\n VALUE = {{ $value }}\n LABELS = {{ $labels }}" 
+
+  - name: test-alert
+    rules:
+      - alert: TestAlert
+        expr: vector(1)
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: “Test Alert”
+          description: “This is a test alert from Prometheus.”
+  
+  - name: cpu_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: avg(rate(node_cpu_seconds_total{mode!="idle"}[5m])) by (instance) > 0.8
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая загрузка CPU на {{ $labels.instance }}"
+          description: "Средняя загрузка CPU превышает 80% за последние 5 минут.\nТекущая загрузка: {{ $value | humanizePercentage }}."
+
+  
+  - name: docker_alerts
+    rules:
+      - alert: DockerContainerDown
+        expr: time() - container_last_seen > 60
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Контейнер Docker {{ $labels.container }} вышел из строя"
+          description: |
+            Контейнер {{ $labels.container }} (instance: {{ $labels.instance }}) не был доступен более 1 минуты.
+            Последний раз был замечен {{ $value | humanizeDuration }} назад.

@@ -1,0 +1,12 @@
+positions:
+  /var/log/alternatives.log: "34320"
+  /var/log/apport.log: "0"
+  /var/log/auth.log: "69939"
+  /var/log/bootstrap.log: "61229"
+  /var/log/cloud-init-output.log: "4886"
+  /var/log/cloud-init.log: "84789"
+  /var/log/dpkg.log: "676875"
+  /var/log/faillog: "0"
+  /var/log/kern.log: "1899145"
+  /var/log/lastlog: "0"
+  /var/log/syslog: "7163026"

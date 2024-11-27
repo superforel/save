@@ -13,7 +13,7 @@ services:
       - wordpressdata:/var/www/html
     networks:
       - front
-
+  
   database:
     container_name: ${CONTAINER_NAME}-database
     image: mysql:8.0
@@ -30,6 +30,18 @@ services:
 
     volumes:
       - sqldata:/var/lib/mysql
+    networks:
+      - back
+  
+  phpmyadmin:
+    container_name: ${CONTAINER_NAME}-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_PORT: ${DATABASE_HOST_PORT}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+    ports:
+      - "8081:80"
     networks:
       - back
     
@@ -66,24 +78,7 @@ services:
       - back
     volumes:
       - redis_data:/data
-  
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0.6
-    container_name: ${CONTAINER_NAME}-keycloak
-    environment:
-      DB_VENDOR: mysql
-      DB_ADDR: database:3306
-      DB_DATABASE: wordpress
-      DB_USER: user
-      DB_PASSWORD: password
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: adminpassword
-    ports:
-      - 8080:8080
-    command: start-dev
-    networks:
-      - back
-  
+
 volumes:
   sqldata:
   wordpressdata:

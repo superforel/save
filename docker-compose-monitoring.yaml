@@ -59,7 +59,64 @@ services:
     networks:
       - prom_net
 
+  loki:
+    image: grafana/loki:2.4.0
+    container_name: ${CONTAINER_NAME}-loki
+    restart: unless-stopped
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
+    # ports:
+    #   - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - prom_net
+
+  promtail:
+    image: grafana/promtail:2.4.0
+    container_name: ${CONTAINER_NAME}-promtail
+    volumes:
+      - /var/log:/var/log
+      - ./promtail:/etc/promtail
+    command: -config.file=/etc/promtail/promtail.yaml
+    restart: unless-stopped
+    networks:
+      - prom_net
+  
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - keycloak-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.6
+    container_name: keycloak
+    restart: always
+    environment:
+      KC_DB: ${KC_DB}
+      KC_DB_URL: ${KC_DB_URL}
+      KC_DB_USERNAME: ${MYSQL_USER}
+      KC_DB_PASSWORD: ${MYSQL_PASSWORD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    command: start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mariadb
+    networks:
+      - keycloak-network
+
 volumes:
+  mariadb_data:
   grafana-storage:
   prom_data:
   alertmanager-data:
@@ -67,4 +124,8 @@ volumes:
 
 networks:
   prom_net:
+    driver: bridge
+  keycloak-network:
+    driver: bridge
+  loki:
     driver: bridge

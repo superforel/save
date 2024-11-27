@@ -8,15 +8,15 @@ positions:
 clients:
   - url: http://loki:3100/loki/api/v1/push
 
-# scrape_configs:
-#   - job_name: local
-#     static_configs:
-#     - targets:
-#       - localhost
-#       labels:
-#         job: varlogs
-#         __path__: /var/log/*log
-
+scrape_configs:
+  - job_name: local
+    static_configs:
+    - targets:
+      - localhost
+      labels:
+        job: varlogs
+        __path__: /var/log/*log
+        
 scrape_configs:
   - job_name: docker
     pipeline_stages:
@@ -25,3 +25,12 @@ scrape_configs:
       - labels:
           job: docker
           __path__: /var/lib/docker/containers/*/*-json.log
+
+
+# {
+#   "log-driver": "loki",
+#   "log-opts": {
+#       "loki-url": "http://loki:3100/loki/api/v1/push",
+#       "loki-batch-size": "400"
+#   }
+# }
